@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fbf6ee">
+<title>მარიამოს ტესტი</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Georgian:wght@400;600;700&family=Noto+Sans+Georgian:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #fbf6ee;
+    --cream-deep: #f4ebdd;
+    --blush: #f2c4c9;
+    --blush-deep: #e6a0ab;
+    --lavender: #c9bfe6;
+    --lavender-deep: #9d8fcc;
+    --ink: #3a2e3a;
+    --ink-soft: #7a6a7a;
+    --glass: rgba(255, 255, 255, 0.62);
+    --shadow: 0 18px 50px -20px rgba(120, 80, 110, 0.35);
+    --serif: "Noto Serif Georgian", Georgia, serif;
+    --sans: "Noto Sans Georgian", system-ui, -apple-system, sans-serif;
+    --ease: cubic-bezier(.2, .7, .2, 1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: var(--sans);
+    color: var(--ink);
+    background:
+      radial-gradient(circle at 12% 8%, rgba(242,196,201,.5), transparent 45%),
+      radial-gradient(circle at 92% 92%, rgba(201,191,230,.5), transparent 50%),
+      var(--cream);
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  button { font: inherit; color: inherit; -webkit-tap-highlight-color: transparent; }
+
+  /* ---------- Decorative background ---------- */
+  .float {
+    position: fixed; border-radius: 50%; opacity: .45;
+    pointer-events: none; z-index: 0; filter: blur(1px);
+    animation: drift 14s ease-in-out infinite;
+  }
+  .float.a { width: 120px; height: 120px; background: var(--blush); top: 6%; left: 4%; }
+  .float.b { width: 76px; height: 76px; background: var(--lavender); top: 68%; right: 6%; animation-duration: 12s; animation-delay: -4s; }
+  .float.c { width: 42px; height: 42px; background: var(--blush-deep); bottom: 10%; left: 12%; opacity: .3; animation-duration: 10s; animation-delay: -2s; }
+  @media (max-width: 480px) { .float.a { width: 90px; height: 90px; } .float.b { width: 56px; height: 56px; } }
+  @keyframes drift { 0%,100% { transform: translate(0,0); } 50% { transform: translate(14px,-22px); } }
+
+  .cursor-glow {
+    position: fixed; width: 320px; height: 320px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(242,196,201,.45), transparent 65%);
+    pointer-events: none; z-index: 0; transform: translate(-50%,-50%);
+    transition: opacity .4s; opacity: 0;
+  }
+  @media (hover: hover) and (pointer: fine) { .cursor-glow.on { opacity: 1; } }
+  @media (hover: none), (pointer: coarse) { .cursor-glow { display: none; } }
+
+  /* ---------- Layout ---------- */
+  .app {
+    position: relative; z-index: 1;
+    min-height: 100dvh;
+    display: flex; flex-direction: column;
+    max-width: 620px; margin: 0 auto;
+    padding: calc(env(safe-area-inset-top, 0px) + 24px) 24px calc(env(safe-area-inset-bottom, 0px) + 24px);
+  }
+  .screen {
+    display: none; flex: 1; flex-direction: column; justify-content: center;
+    padding: 24px 0; animation: fadeUp .7s var(--ease) both;
+  }
+  .screen.active { display: flex; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+
+  .eyebrow {
+    font-size: .8rem; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--lavender-deep); margin-bottom: 18px;
+  }
+  h1 {
+    font-family: var(--serif); font-weight: 700;
+    font-size: clamp(2.3rem, 9vw, 3.6rem); line-height: 1.15; margin-bottom: 20px;
+    background: linear-gradient(120deg, var(--ink) 0%, var(--blush-deep) 60%, var(--lavender-deep) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  h2 {
+    font-family: var(--serif); font-weight: 600;
+    font-size: clamp(1.4rem, 5.5vw, 2rem); line-height: 1.35; margin-bottom: 28px;
+  }
+  .lead { font-size: clamp(1rem, 3.8vw, 1.1rem); color: var(--ink-soft); line-height: 1.75; margin-bottom: 14px; }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    position: relative; overflow: hidden;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: 52px; padding: 14px 32px; border: none; border-radius: 999px;
+    font-family: var(--sans); font-size: 1rem; font-weight: 500; cursor: pointer;
+    background: linear-gradient(135deg, var(--blush) 0%, var(--lavender) 100%);
+    color: var(--ink); box-shadow: var(--shadow);
+    transition: transform .25s var(--ease), box-shadow .25s var(--ease), opacity .25s;
+    touch-action: manipulation;
+  }
+  .btn:active { transform: scale(.97); }
+  .btn:focus-visible { outline: 2px solid var(--lavender-deep); outline-offset: 4px; }
+  .btn:disabled { opacity: .4; cursor: not-allowed; box-shadow: none; }
+  @media (hover: hover) {
+    .btn:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 22px 55px -20px rgba(120,80,110,.5); }
+  }
+  .btn .ripple {
+    position: absolute; border-radius: 50%; background: rgba(255,255,255,.6);
+    transform: scale(0); animation: ripple .6s var(--ease) forwards; pointer-events: none;
+  }
+  @keyframes ripple { to { transform: scale(4); opacity: 0; } }
+  .btn.ghost { background: transparent; box-shadow: none; color: var(--ink-soft); padding: 12px 18px; min-height: 48px; }
+  @media (hover: hover) { .btn.ghost:not(:disabled):hover { transform: none; color: var(--ink); box-shadow: none; } }
+  .btn.wide { width: 100%; }
+
+  /* ---------- Intro ---------- */
+  .orb-wrap { position: relative; width: 180px; height: 180px; margin: 0 0 36px; }
+  .orb {
+    position: absolute; inset: 20px; border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #fff 0%, var(--blush) 40%, var(--lavender) 100%);
+    box-shadow: var(--shadow); animation: breathe 5s ease-in-out infinite;
+  }
+  .ring {
+    position: absolute; inset: 0; border-radius: 50%;
+    border: 1px solid rgba(157,143,204,.35); animation: spin 18s linear infinite;
+  }
+  .ring::after {
+    content: ""; position: absolute; top: -4px; left: 50%; width: 8px; height: 8px;
+    margin-left: -4px; border-radius: 50%; background: var(--lavender-deep);
+  }
+  .ring.r2 { inset: -14px; animation-duration: 28s; animation-direction: reverse; border-color: rgba(230,160,171,.35); }
+  .ring.r2::after { background: var(--blush-deep); }
+  @keyframes breathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .orb-wrap.clickable { cursor: pointer; }
+  .orb-wrap.clickable .orb { transition: transform .4s var(--ease); }
+  .orb-wrap.clickable:active .orb { transform: scale(.9); }
+
+  .meta-list { list-style: none; margin: 0 0 40px; font-size: .95rem; color: var(--ink-soft); }
+  .meta-list li { margin-bottom: 8px; }
+  .meta-list strong { color: var(--ink); font-weight: 500; }
+
+  .hint {
+    margin-top: 18px; font-size: .85rem; color: var(--ink-soft); opacity: .8;
+  }
+
+  /* ---------- Progress ---------- */
+  .progress { display: flex; gap: 8px; margin-bottom: 14px; }
+  .progress button {
+    flex: 1; height: 14px; border: none; background: none; cursor: pointer; padding: 5px 0;
+    display: flex; align-items: center;
+  }
+  .progress button i {
+    display: block; width: 100%; height: 4px; border-radius: 4px;
+    background: rgba(157,143,204,.2); position: relative; overflow: hidden;
+  }
+  .progress button i::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(90deg, var(--blush-deep), var(--lavender-deep));
+    transform: scaleX(0); transform-origin: left; transition: transform .6s var(--ease);
+  }
+  .progress button.done i::after, .progress button.current i::after { transform: scaleX(1); }
+  .progress button.current i::after { opacity: .55; }
+  .progress button:disabled { cursor: default; }
+
+  .step-label { font-size: .85rem; color: var(--ink-soft); margin-bottom: 18px; letter-spacing: .05em; }
+
+  /* ---------- Question ---------- */
+  .question-body { transition: opacity .35s ease, transform .35s var(--ease); }
+  .question-body.out { opacity: 0; transform: translateY(-10px); }
+  .question-body.in { opacity: 1; transform: none; }
+  .options { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+  .option {
+    display: flex; align-items: center; gap: 16px; width: 100%;
+    min-height: 60px; padding: 16px 20px; text-align: left; line-height: 1.5;
+    font-size: clamp(.97rem, 3.6vw, 1.02rem);
+    border-radius: 18px; border: 1px solid rgba(157,143,204,.25);
+    background: var(--glass); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    box-shadow: 0 6px 20px -14px rgba(120,80,110,.4); cursor: pointer;
+    transition: transform .3s var(--ease), background .3s, border-color .3s, box-shadow .3s;
+    touch-action: manipulation; opacity: 0; transform: translateY(10px);
+    animation: optIn .5s var(--ease) forwards;
+  }
+  .option:nth-child(2) { animation-delay: .07s; }
+  .option:nth-child(3) { animation-delay: .14s; }
+  .option:nth-child(4) { animation-delay: .21s; }
+  @keyframes optIn { to { opacity: 1; transform: none; } }
+  .option .letter {
+    flex: 0 0 34px; height: 34px; border-radius: 50%;
+    display: grid; place-items: center; font-family: var(--serif); font-size: .95rem;
+    background: rgba(201,191,230,.35); color: var(--lavender-deep);
+    transition: background .3s, color .3s, transform .3s var(--ease);
+  }
+  .option:focus-visible { outline: 2px solid var(--lavender-deep); outline-offset: 3px; }
+  @media (hover: hover) {
+    .option:hover { border-color: var(--blush-deep); transform: translateX(4px); background: #fff; }
+  }
+  .option:active { transform: scale(.985); }
+  .option[aria-checked="true"] {
+    background: linear-gradient(135deg, #fff 0%, #fbe6e9 100%);
+    border-color: var(--blush-deep);
+    box-shadow: 0 14px 34px -16px rgba(230,160,171,.8);
+    transform: translateX(6px);
+  }
+  .option[aria-checked="true"] .letter { background: var(--blush-deep); color: #fff; transform: scale(1.08); }
+
+  .nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .nav .btn { min-width: 150px; }
+  .swipe-hint { text-align: center; font-size: .8rem; color: var(--ink-soft); opacity: .7; margin-top: 16px; display: none; }
+  @media (max-width: 600px) { .swipe-hint { display: block; } }
+
+  /* ---------- Analysis ---------- */
+  .analysis { align-items: center; text-align: center; cursor: pointer; }
+  .lab { position: relative; width: 220px; height: 220px; margin: 20px auto 40px; }
+  .lab .core {
+    position: absolute; inset: 70px; border-radius: 50%;
+    background: radial-gradient(circle, #fff 0%, var(--blush) 60%, var(--blush-deep) 100%);
+    box-shadow: 0 0 40px rgba(230,160,171,.7); animation: pulse 2.4s ease-in-out infinite;
+  }
+  .lab .orbit {
+    position: absolute; inset: 0; border-radius: 50%;
+    border: 1.5px solid rgba(157,143,204,.45); animation: spin 6s linear infinite;
+  }
+  .lab .orbit.o2 { inset: 22px; animation-duration: 4s; animation-direction: reverse; border-color: rgba(230,160,171,.6); }
+  .lab .orbit.o3 { inset: -18px; animation-duration: 9s; border-style: dashed; }
+  .lab .orbit::before {
+    content: ""; position: absolute; width: 10px; height: 10px; border-radius: 50%;
+    background: var(--lavender-deep); top: -5px; left: 50%; margin-left: -5px;
+    box-shadow: 0 0 12px var(--lavender-deep);
+  }
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+  .analysis-msg {
+    font-family: var(--serif); font-size: clamp(1.1rem, 4.5vw, 1.25rem);
+    min-height: 2.6em; color: var(--ink); transition: opacity .5s ease, transform .5s var(--ease);
+    padding: 0 8px;
+  }
+  .analysis-msg.hide { opacity: 0; transform: translateY(8px); }
+  .bar { width: 220px; max-width: 80%; height: 3px; background: rgba(157,143,204,.2); border-radius: 3px; margin: 28px auto 0; overflow: hidden; }
+  .bar-fill {
+    width: 100%; height: 100%; transform: scaleX(0); transform-origin: left;
+    background: linear-gradient(90deg, var(--blush-deep), var(--lavender-deep));
+  }
+
+  /* ---------- Reveal ---------- */
+  .reveal-line { opacity: 0; transform: translateY(14px); transition: opacity .9s ease, transform .9s var(--ease); }
+  .reveal-line.show { opacity: 1; transform: none; }
+  .reveal-title { font-family: var(--serif); font-size: clamp(2rem, 8vw, 2.8rem); font-weight: 700; margin-bottom: 28px; }
+  .sparkle { display: inline-block; animation: twinkle 2.6s ease-in-out infinite; }
+  @keyframes twinkle {
+    0%,100% { opacity: .4; transform: scale(.9) rotate(0); }
+    50% { opacity: 1; transform: scale(1.1) rotate(15deg); }
+  }
+  .divider { width: 60px; height: 1px; background: linear-gradient(90deg, transparent, var(--blush-deep), transparent); margin: 28px 0; }
+
+  .meter {
+    margin: 8px 0 36px; padding: 22px 24px; border-radius: 24px;
+    background: var(--glass); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,.8); box-shadow: var(--shadow);
+  }
+  .meter-label { font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); }
+  .meter-row { display: flex; align-items: baseline; gap: 6px; margin: 6px 0 14px; }
+  .meter-value { font-family: var(--serif); font-size: 3rem; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+  .meter-unit { font-size: 1.4rem; color: var(--ink-soft); }
+  .meter-track { height: 10px; border-radius: 10px; background: rgba(157,143,204,.2); overflow: hidden; }
+  .meter-fill {
+    height: 100%; width: 0%; border-radius: 10px;
+    background: linear-gradient(90deg, var(--blush-deep), var(--lavender-deep));
+    transition: width 1.6s var(--ease);
+  }
+  .meter-caption { margin-top: 12px; font-size: .95rem; color: var(--ink-soft); line-height: 1.6; min-height: 3em; }
+
+  /* ---------- Final ---------- */
+  .final p { margin-bottom: 16px; color: var(--ink); line-height: 1.85; font-size: clamp(1rem, 3.8vw, 1.05rem); }
+  .final .replay { margin-top: 40px; align-self: flex-start; }
+  .heart-small { display: inline-block; color: var(--blush-deep); animation: breathe 3s ease-in-out infinite; }
+  .final .meter { margin-top: 28px; }
+
+  /* ---------- Confetti ---------- */
+  .confetti-layer { position: fixed; inset: 0; pointer-events: none; z-index: 5; overflow: hidden; }
+  .confetti {
+    position: absolute; top: -20px; width: 10px; height: 14px; border-radius: 3px;
+    background: var(--c); opacity: .9;
+    animation: fall var(--d) cubic-bezier(.3,.6,.4,1) forwards;
+  }
+  @keyframes fall {
+    0% { transform: translate(0,0) rotate(0); }
+    100% { transform: translate(var(--x), 110vh) rotate(var(--r)); opacity: 0; }
+  }
+
+  /* ---------- Reduced motion ---------- */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  }
+  :focus-visible { outline-color: var(--lavender-deep); }
+</style>
+</head>
+<body>
+
+<div class="float a" aria-hidden="true"></div>
+<div class="float b" aria-hidden="true"></div>
+<div class="float c" aria-hidden="true"></div>
+<div class="cursor-glow" id="glow" aria-hidden="true"></div>
+<div class="confetti-layer" id="confetti" aria-hidden="true"></div>
+
+<main class="app" id="app">
+
+  <!-- 1. INTRO -->
+  <section class="screen active" id="screen-intro" aria-label="შესავალი">
+    <div class="orb-wrap clickable" id="orb" role="button" tabindex="0" aria-label="ხუმრობა">
+      <div class="ring"></div>
+      <div class="ring r2"></div>
+      <div class="orb"></div>
+    </div>
+    <p class="eyebrow">ექსპერიმენტი № 1</p>
+    <h1>მარიამოს ტესტი</h1>
+    <p class="lead">ერთი პატარა და სრულიად არასერიოზული ექსპერიმენტი.</p>
+    <ul class="meta-list">
+      <li>ხანგრძლივობა: <strong>დაახლოებით 2 წუთი.</strong></li>
+      <li>მეცნიერული სიზუსტე: <strong>გარანტირებული არ არის.</strong></li>
+    </ul>
+    <button class="btn" id="btn-start">დაწყება →</button>
+    <p class="hint">კლავიატურით: Enter · ტელეფონზე: გადაფურცლე</p>
+  </section>
+
+  <!-- 2. QUESTIONS -->
+  <section class="screen" id="screen-quiz" aria-label="კითხვები">
+    <div class="progress" id="progress" role="group" aria-label="პროგრესი"></div>
+    <p class="step-label" id="step-label"></p>
+    <div class="question-body in" id="question-body">
+      <h2 id="question-text"></h2>
+      <div class="options" id="options" role="radiogroup" aria-labelledby="question-text"></div>
+    </div>
+    <div class="nav">
+      <button class="btn ghost" id="btn-back">← წინა</button>
+      <button class="btn" id="btn-next" disabled>შემდეგი →</button>
+    </div>
+    <p class="swipe-hint">მარცხნივ გადაფურცვლა — შემდეგი · მარჯვნივ — წინა</p>
+  </section>
+
+  <!-- 3. ANALYSIS -->
+  <section class="screen analysis" id="screen-analysis" aria-live="polite" aria-label="პასუხების დამუშავება">
+    <div class="lab" aria-hidden="true">
+      <div class="orbit"></div>
+      <div class="orbit o2"></div>
+      <div class="orbit o3"></div>
+      <div class="core"></div>
+    </div>
+    <p class="analysis-msg" id="analysis-msg"></p>
+    <div class="bar" aria-hidden="true"><div class="bar-fill" id="bar-fill"></div></div>
+    <p class="hint">დააწკაპუნე, რომ უკვე ნახო შედეგი</p>
+  </section>
+
+  <!-- 4. REVEAL -->
+  <section class="screen" id="screen-reveal" aria-label="შედეგი">
+    <h1 class="reveal-title reveal-line" id="rv-title">
+      გილოცავ, მარიამო! <span class="sparkle">✨</span>
+    </h1>
+    <p class="lead reveal-line" id="rv-1">შენ ეს უმნიშვნელოვანესი ექსპერიმენტი წარმატებით გაიარე.</p>
+    <div class="divider reveal-line" id="rv-div"></div>
+    <p class="lead reveal-line" id="rv-2">სიმართლე გითხრა, ამ ექსპერიმენტს დიდი მეცნიერული მნიშვნელობა არ აქვს.</p>
+    <p class="lead reveal-line" id="rv-3">უბრალოდ მომინდა, შენთვის რაღაც განსხვავებული და სახალისო გამეკეთებინა.</p>
+    <div class="meter reveal-line" id="rv-meter">
+      <div class="meter-label">ორშაბათის გამძლეობა</div>
+      <div class="meter-row"><span class="meter-value" id="meter-value">0</span><span class="meter-unit">%</span></div>
+      <div class="meter-track"><div class="meter-fill" id="meter-fill"></div></div>
+      <p class="meter-caption" id="meter-caption"></p>
+    </div>
+    <button class="btn reveal-line" id="btn-to-final" style="align-self:flex-start;">გაგრძელება →</button>
+  </section>
+
+  <!-- 5. FINAL -->
+  <section class="screen final" id="screen-final" aria-label="დასასრული">
+    <h2 class="reveal-line" id="fin-title">კარგი, მარიამ…</h2>
+    <p class="reveal-line" id="fin-1">ეს პატარა საიტი შენთვის გავაკეთე. იმედი მაქვს, ცოტა მაინც გაგახალისა.</p>
+    <p class="reveal-line" id="fin-2">თუ ერთხელ მაინც გაგეღიმა, მაშინ ყველაფერი გამომივიდა.</p>
+    <p class="reveal-line" id="fin-3">დანარჩენს კი დრო გვიჩვენებს. <span class="heart-small">:)</span></p>
+    <button class="btn ghost replay reveal-line" id="btn-replay">თავიდან გავიმეოროთ ↺</button>
+  </section>
+
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Content ---------- */
+  const QUESTIONS = [
+    {
+      text: "ორშაბათია, დილის ცხრა საათი. როგორ იწყებ დღეს?",
+      options: [
+        { label: "ჯერ ყავა, მერე ყველაფერი დანარჩენი.", w: 60 },
+        { label: "თავს ვაჯერებ, რომ ჯერ კიდევ კვირაა.", w: 25 },
+        { label: "ჯერ ბოლომდე არ გამიღვიძია. მოგვიანებით მკითხეთ.", w: 10 },
+        { label: "ნელ-ნელა, როგორმე გავუძლებ.", w: 45 }
+      ]
+    },
+    {
+      text: "ლექტორი ამბობს: „ეს გამოცდაზე აუცილებლად იქნება“.",
+      options: [
+        { label: "მაშინვე ვიწერ — ყოველი შემთხვევისთვის.", w: 85 },
+        { label: "უცებ მთელი ყურადღება ლექტორისკენ მაქვს მიპყრობილი.", w: 95 },
+        { label: "ჩუმად ვემზადები უარესისთვის.", w: 55 },
+        { label: "იმედია, გამოცდამდე ლექტორსაც დაავიწყდება.", w: 15 }
+      ]
+    },
+    {
+      text: "ლექციებს შორის ორი თავისუფალი საათი გაქვს. რას აკეთებ?",
+      options: [
+        { label: "ყავას ვიყიდი — სხვა გეგმები მერე იყოს.", w: 90 },
+        { label: "მეგობრებს შევუერთდები.", w: 75 },
+        { label: "ცოტას გავისეირნებ და განვიტვირთები.", w: 60 },
+        { label: "სადმე მოვკალათდები და არაფერს გავაკეთებ.", w: 30 }
+      ]
+    }
+  ];
+
+  const ANALYSIS_MESSAGES = [
+    "ყავის გარეშე გაძლების უნარს ვამოწმებ...",
+    "ორშაბათთან გამკლავების უნარს ვაფასებ...",
+    "პასუხებს უდიდესი სერიოზულობით ვამუშავებ...",
+    "მეცნიერები ჯერ კიდევ ვერ შეთანხმდნენ...",
+    "დასკვნა მზად არის... თითქმის."
+  ];
+  const ANALYSIS_STEP = 1000;          // ms per message
+  const ANALYSIS_TOTAL = ANALYSIS_MESSAGES.length * ANALYSIS_STEP;
+
+  const CAPTIONS = [
+    [40,  "ორშაბათი შენთვის ჯერ კიდევ მძიმეა. ეს სრულიად ნორმალურია."],
+    [75,  "კარგი შედეგია. ორშაბათი შენს მხარეს დგას, უბრალოდ ცოტა დრო სჭირდება."],
+    [101, "ორშაბათი შენ გაქვს დაპყრობილი. ✨"]
+  ];
+
+  /* ---------- Helpers ---------- */
+  const $ = (id) => document.getElementById(id);
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const screens = {
+    intro: $("screen-intro"), quiz: $("screen-quiz"), analysis: $("screen-analysis"),
+    reveal: $("screen-reveal"), final: $("screen-final")
+  };
+
+  let answers = new Array(QUESTIONS.length).fill(null);
+  let current = 0;
+  let timers = [];
+  let meterRAF = null;
+  let busy = false;                    // blocks double-taps during transitions
+
+  const later = (fn, ms) => { const t = setTimeout(fn, ms); timers.push(t); return t; };
+  const clearTimers = () => { timers.forEach(clearTimeout); timers = []; if (meterRAF) cancelAnimationFrame(meterRAF); meterRAF = null; };
+
+  function show(name) {
+    Object.values(screens).forEach(s => { s.classList.remove("active"); });
+    screens[name].classList.add("active");
+    window.scrollTo(0, 0);
+  }
+
+  function ripple(e, el) {
+    const r = el.getBoundingClientRect();
+    const size = Math.max(r.width, r.height);
+    const s = document.createElement("span");
+    s.className = "ripple";
+    const x = (e.clientX ?? r.left + r.width / 2) - r.left - size / 2;
+    const y = (e.clientY ?? r.top + r.height / 2) - r.top - size / 2;
+    s.style.cssText = `width:${size}px;height:${size}px;left:${x}px;top:${y}px`;
+    el.appendChild(s);
+    setTimeout(() => s.remove(), 650);
+  }
+  document.addEventListener("pointerdown", (e) => {
+    const b = e.target.closest(".btn");
+    if (b && !b.disabled && !reduceMotion) ripple(e, b);
+  });
+
+  function confetti() {
+    if (reduceMotion) return;
+    const layer = $("confetti");
+    const colors = ["#f2c4c9", "#e6a0ab", "#c9bfe6", "#9d8fcc", "#fbe6e9", "#f4ebdd"];
+    for (let i = 0; i < 70; i++) {
+      const p = document.createElement("span");
+      p.className = "confetti";
+      p.style.left = Math.random() * 100 + "vw";
+      p.style.setProperty("--c", colors[i % colors.length]);
+      p.style.setProperty("--x", (Math.random() * 160 - 80) + "px");
+      p.style.setProperty("--r", (Math.random() * 720 - 360) + "deg");
+      p.style.setProperty("--d", (2.2 + Math.random() * 1.8) + "s");
+      p.style.animationDelay = (Math.random() * 0.4) + "s";
+      layer.appendChild(p);
+      setTimeout(() => p.remove(), 4500);
+    }
+  }
+
+  /* ---------- Cursor glow (desktop only) ---------- */
+  const glow = $("glow");
+  document.addEventListener("pointermove", (e) => {
+    if (e.pointerType !== "mouse") return;
+    glow.style.left = e.clientX + "px";
+    glow.style.top = e.clientY + "px";
+    glow.classList.add("on");
+  });
+
+  /* ---------- Progress ---------- */
+  function buildProgress() {
+    const wrap = $("progress");
+    wrap.innerHTML = "";
+    QUESTIONS.forEach((_, i) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.setAttribute("aria-label", `კითხვა ${i + 1}`);
+      b.innerHTML = "<i></i>";
+      b.addEventListener("click", () => jumpTo(i));
+      wrap.appendChild(b);
+    });
+  }
+  function renderProgress() {
+    const furthest = answers.indexOf(null) === -1 ? QUESTIONS.length - 1 : answers.indexOf(null);
+    document.querySelectorAll("#progress button").forEach((b, i) => {
+      b.classList.toggle("done", i < current || (i === current && answers[i] !== null));
+      b.classList.toggle("current", i === current && answers[i] === null);
+      b.disabled = i > furthest;
+    });
+  }
+
+  /* ---------- Quiz ---------- */
+  function renderQuestion(animate) {
+    const q = QUESTIONS[current];
+    const body = $("question-body");
+    const apply = () => {
+      $("step-label").textContent = `კითხვა ${current + 1} / ${QUESTIONS.length}`;
+      $("question-text").textContent = q.text;
+      const wrap = $("options");
+      wrap.innerHTML = "";
+      q.options.forEach((opt, idx) => {
+        const b = document.createElement("button");
+        b.className = "option";
+        b.type = "button";
+        b.setAttribute("role", "radio");
+        b.setAttribute("aria-checked", answers[current] === idx ? "true" : "false");
+        b.tabIndex = (answers[current] === idx || (answers[current] === null && idx === 0)) ? 0 : -1;
+        const letter = document.createElement("span");
+        letter.className = "letter";
+        letter.textContent = "ABCD"[idx];
+        const text = document.createElement("span");
+        text.textContent = opt.label;
+        b.append(letter, text);
+        b.addEventListener("click", () => select(idx));
+        b.addEventListener("keydown", (e) => handleKey(e, idx));
+        wrap.appendChild(b);
+      });
+      $("btn-back").style.visibility = current === 0 ? "hidden" : "visible";
+      $("btn-next").disabled = answers[current] === null;
+      $("btn-next").textContent = current === QUESTIONS.length - 1 ? "შედეგების ნახვა →" : "შემდეგი →";
+      renderProgress();
+      body.classList.remove("out");
+      body.classList.add("in");
+      busy = false;
+    };
+    if (animate && !reduceMotion) {
+      busy = true;
+      body.classList.remove("in");
+      body.classList.add("out");
+      later(apply, 300);
+    } else {
+      apply();
+    }
+  }
+
+  function select(idx) {
+    answers[current] = idx;
+    document.querySelectorAll(".option").forEach((el, i) => {
+      el.setAttribute("aria-checked", i === idx ? "true" : "false");
+      el.tabIndex = i === idx ? 0 : -1;
+    });
+    $("btn-next").disabled = false;
+    renderProgress();
+  }
+
+  function handleKey(e, idx) {
+    const opts = [...document.querySelectorAll(".option")];
+    let target = null;
+    if (["ArrowDown", "ArrowRight"].includes(e.key)) target = (idx + 1) % opts.length;
+    else if (["ArrowUp", "ArrowLeft"].includes(e.key)) target = (idx - 1 + opts.length) % opts.length;
+    else if (e.key === " " || e.key === "Enter") { e.preventDefault(); select(idx); return; }
+    if (target !== null) {
+      e.preventDefault();
+      select(target);
+      opts[target].focus();
+    }
+  }
+
+  function next() {
+    if (busy || answers[current] === null) return;
+    if (current < QUESTIONS.length - 1) {
+      current++;
+      renderQuestion(true);
+    } else {
+      startAnalysis();
+    }
+  }
+
+  function back() {
+    if (busy || current === 0) return;
+    current--;
+    renderQuestion(true);
+  }
+
+  function jumpTo(i) {
+    if (busy || i === current) return;
+    current = i;
+    renderQuestion(true);
+  }
+
+  /* ---------- Analysis ---------- */
+  function startAnalysis() {
+    clearTimers();
+    show("analysis");
+    const msgEl = $("analysis-msg");
+    const fill = $("bar-fill");
+
+    // Bar runs for exactly as long as the messages do.
+    fill.style.transition = "none";
+    fill.style.transform = "scaleX(0)";
+    void fill.offsetWidth;
+    fill.style.transition = `transform ${ANALYSIS_TOTAL}ms linear`;
+    fill.style.transform = "scaleX(1)";
+
+    msgEl.textContent = ANALYSIS_MESSAGES[0];
+    let i = 0;
+    const tick = () => {
+      i++;
+      if (i >= ANALYSIS_MESSAGES.length) { startReveal(); return; }
+      msgEl.classList.add("hide");
+      later(() => {
+        msgEl.textContent = ANALYSIS_MESSAGES[i];
+        msgEl.classList.remove("hide");
+      }, 300);
+      later(tick, ANALYSIS_STEP);
+    };
+    later(tick, ANALYSIS_STEP);
+  }
+
+  /* ---------- Score ---------- */
+  function computeScore() {
+    const total = answers.reduce((sum, a, qi) => sum + QUESTIONS[qi].options[a].w, 0);
+    return Math.round(total / QUESTIONS.length);
+  }
+  function captionFor(score) {
+    return (CAPTIONS.find(([max]) => score < max) || CAPTIONS[CAPTIONS.length - 1])[1];
+  }
+
+  function countMeter(target) {
+    const valueEl = $("meter-value");
+    $("meter-fill").style.width = target + "%";
+    $("meter-caption").textContent = captionFor(target);
+    if (reduceMotion) { valueEl.textContent = target; return; }
+    const duration = 1600;
+    const start = performance.now();
+    const step = (now) => {
+      const p = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      valueEl.textContent = Math.round(eased * target);
+      if (p < 1) meterRAF = requestAnimationFrame(step);
+    };
+    meterRAF = requestAnimationFrame(step);
+  }
+
+  /* ---------- Reveal ---------- */
+  function startReveal() {
+    clearTimers();
+    show("reveal");
+    const ids = ["rv-title", "rv-1", "rv-div", "rv-2", "rv-3", "rv-meter", "btn-to-final"];
+    ids.forEach((id, i) => {
+      later(() => {
+        $(id).classList.add("show");
+        if (id === "rv-title") confetti();
+        if (id === "rv-meter") countMeter(computeScore());
+      }, 400 + i * 900);
+    });
+  }
+
+  /* ---------- Final ---------- */
+  function startFinal() {
+    clearTimers();
+    show("final");
+    const ids = ["fin-title", "fin-1", "fin-2", "fin-3", "btn-replay"];
+    ids.forEach(id => $(id).classList.remove("show"));
+    ids.forEach((id, i) => later(() => $(id).classList.add("show"), 250 + i * 900));
+  }
+
+  /* ---------- Replay ---------- */
+  function replay() {
+    clearTimers();
+    answers = new Array(QUESTIONS.length).fill(null);
+    current = 0;
+    busy = false;
+    document.querySelectorAll(".reveal-line").forEach(el => el.classList.remove("show"));
+    $("meter-value").textContent = "0";
+    $("meter-fill").style.width = "0%";
+    renderQuestion(false);
+    show("intro");
+  }
+
+  function start() {
+    clearTimers();
+    current = 0;
+    answers = new Array(QUESTIONS.length).fill(null);
+    renderQuestion(false);
+    show("quiz");
+  }
+
+  /* ---------- Wiring ---------- */
+  buildProgress();
+
+  $("btn-start").addEventListener("click", start);
+  $("orb").addEventListener("click", () => { $("orb").animate && $("orb").animate([{transform:"rotate(0)"},{transform:"rotate(360deg)"}], {duration: 700, easing: "ease-out"}); });
+  $("orb").addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); start(); } });
+  $("btn-next").addEventListener("click", next);
+  $("btn-back").addEventListener("click", back);
+  $("btn-to-final").addEventListener("click", startFinal);
+  $("btn-replay").addEventListener("click", replay);
+  screens.analysis.addEventListener("click", () => { if (screens.analysis.classList.contains("active")) { clearTimers(); startReveal(); } });
+
+  // Enter advances on the quiz screen, when focus is not already on a button.
+  document.addEventListener("keydown", (e) => {
+    if (!screens.quiz.classList.contains("active")) return;
+    if (e.key === "Enter" && document.activeElement === document.body) next();
+  });
+
+  // Horizontal swipe on touch devices: left = next, right = back.
+  let touchX = null, touchY = null;
+  screens.quiz.addEventListener("touchstart", (e) => {
+    touchX = e.touches[0].clientX; touchY = e.touches[0].clientY;
+  }, { passive: true });
+  screens.quiz.addEventListener("touchend", (e) => {
+    if (touchX === null) return;
+    const dx = e.changedTouches[0].clientX - touchX;
+    const dy = e.changedTouches[0].clientY - touchY;
+    touchX = null;
+    if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      dx < 0 ? next() : back();
+    }
+  });
+
+  // Chrome-style back on Android/iOS is not hijacked; only the in-app back works.
+  renderProgress();
+})();
+</script>
+</body>
+</html>
